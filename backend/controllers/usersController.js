@@ -9,19 +9,22 @@ const User = require('../models/userModel')
 // @route   /api/user/
 // @access  Public
 const createUser = asyncHandler(async(req, res) => {
+  
   const { name, email, password } = req.body
   if (!name || !email || !password) {
     res.status(400)
     throw new Error(`Please add all fields`)
   }
+
   const userExists = await User.findOne({ email })
   if (userExists) {
     res.status(400)
     throw new Error(`User already exists`)
   }
+
+
   const salt = await bcrypt.genSalt(10)
   const hashedPass = await bcrypt.hash(password, salt)
-
   const user = await User.create({
     name,
     email,
@@ -33,7 +36,8 @@ const createUser = asyncHandler(async(req, res) => {
       _id: user.id,
       name: user.name,
       email: user.email,
-      password: user.password
+      password: user.password,
+      token: generateToken(user._id)
     })
   } else {
     res.status(400)
@@ -45,6 +49,7 @@ const createUser = asyncHandler(async(req, res) => {
 // @route   /api/user/login
 // @access  Public
 const loginUser = asyncHandler(async(req, res) => {
+
   const { email, password } = req.body
   const user = await User.findOne({ email })
   if (user && (await bcrypt.compare(password, user.password))) {
@@ -52,7 +57,8 @@ const loginUser = asyncHandler(async(req, res) => {
       _id: user.id,
       name: user.name,
       email: user.email,
-      password: user.password
+      password: user.password,
+      token: generateToken(user._id)
     })
   } else {
     res.status(400)
@@ -76,6 +82,13 @@ const submitData = asyncHandler(async(req, res) => {
   res.status(200)
   res.json({message: 'User sends videos'})
 })
+
+  // JWT
+  const generateToken = (id) => {
+    return jwt.sign({id}, process.env.JWT_SECRET, {
+      expiresIn: "30d"
+    })
+  }
 
 
 module.exports = {
