@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
+const { v4: uuidv4 } = require('uuid')
 
 
 
@@ -70,19 +71,26 @@ const loginUser = asyncHandler(async(req, res) => {
 // @route   /api/user/
 // @access  Private
 const getUser = asyncHandler(async(req, res) => {
-  
+  const { _id, name, email } = await User.findById(req.user.id)
   res.status(200)
-  res.json({ message: `Get user information` })
+  res.json({ id: _id, name, email })
 })
 
 // @desc    POST User sends videos
 // @route   /api/user/submit
 // @access  Private
 const submitData = asyncHandler(async(req, res) => {
+  let uuid = await generateUuid()
+  const videos = req.body.videos.split(', ')
   res.status(200)
-  res.json({message: 'User sends videos'})
+  res.json({videos, uuid})
 })
 
+
+  // UUID
+  const generateUuid = () => {
+    return uuidv4()
+  }
   // JWT
   const generateToken = (id) => {
     return jwt.sign({id}, process.env.JWT_SECRET, {
