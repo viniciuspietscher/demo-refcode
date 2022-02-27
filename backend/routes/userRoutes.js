@@ -7,6 +7,6 @@ const { createUser, getUser, loginUser, submitData } = require('../controllers/u
 router.post('/login', loginUser)
 router.get('/', protect, getUser)
 router.post('/', createUser)
-router.post('/submit', submitData)
+router.post('/submit', protect, submitData)
 
 module.exports = router

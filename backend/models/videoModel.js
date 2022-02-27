@@ -6,9 +6,13 @@ const videosSchema = mongoose.Schema(
       type: Array,
       required: [true, 'Please add an array of videos']
     },
-    hash: {
+    language: {
       type: String,
-      required: [true, 'Please add a hash']
+      required: [true, 'Please add a language']
+    },
+    uuid: {
+      type: String,
+      required: [true, 'Please add a uuid']
     }
   },
   { timestamps: false }

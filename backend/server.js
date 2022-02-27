@@ -12,6 +12,7 @@ connectDB()
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 app.use('/api/user', require('../backend/routes/userRoutes'))
+app.use('/api/patient', require('../backend/routes/patientRoutes'))
 app.use(errorHandler)
 
 app.listen(PORT, () => {console.log(`Server listening on localhost:${PORT}`.green.underline)})

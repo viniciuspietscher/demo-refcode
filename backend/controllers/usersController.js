@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 const { v4: uuidv4 } = require('uuid')
+const Video = require('../models/videoModel')
 
 
 
@@ -38,7 +39,6 @@ const createUser = asyncHandler(async(req, res) => {
       name: user.name,
       email: user.email,
       password: user.password,
-      token: generateToken(user._id)
     })
   } else {
     res.status(400)
@@ -59,7 +59,7 @@ const loginUser = asyncHandler(async(req, res) => {
       name: user.name,
       email: user.email,
       password: user.password,
-      token: generateToken(user._id)
+      token: await generateToken(user._id)
     })
   } else {
     res.status(400)
@@ -80,23 +80,63 @@ const getUser = asyncHandler(async(req, res) => {
 // @route   /api/user/submit
 // @access  Private
 const submitData = asyncHandler(async(req, res) => {
-  let uuid = await generateUuid()
+  if (!req.body.videos) {
+    res.status(400)
+    throw new Error('Please select at least one video')
+  }
+  if (!req.body.lang) {
+    res.status(400)
+    throw new Error('Please select the target language')
+  }
+  
+  const uuid = await generateUuid()
   const videos = req.body.videos.split(', ')
-  res.status(200)
-  res.json({videos, uuid})
+  const lang = req.body.lang
+  const videos_lang = await getTranslatedVideo(videos, lang)
+
+  const addVideo = await Video.create({
+    videos: videos_lang,
+    language: lang,
+    uuid,
+  })
+
+  if (addVideo) {
+    res.status(201).json({
+      videos: addVideo.videos,
+      uuid: addVideo.uuid,
+      lang: addVideo.language
+    })
+  } else {
+    res.status(400)
+    throw new Error(`Invalid data`)
+  }
+
+  // Add method to send patient the video
+  
 })
 
 
-  // UUID
-  const generateUuid = () => {
-    return uuidv4()
-  }
-  // JWT
-  const generateToken = (id) => {
-    return jwt.sign({id}, process.env.JWT_SECRET, {
-      expiresIn: "30d"
-    })
-  }
+
+
+// get video on target language
+const getTranslatedVideo = (arr, lang) => {
+  let translatedVideos = []
+  arr.forEach(e => {
+    translatedVideos.push(`${e.split('.')[0]}.${lang}.${e.split('.')[1]}`)
+  })
+  return translatedVideos
+}
+
+// UUID
+const generateUuid = () => {
+  return uuidv4()
+}
+// JWT
+const generateToken = (id) => {
+  return jwt.sign({id}, process.env.JWT_SECRET, {
+    expiresIn: "30d"
+  })
+}
 
 
 module.exports = {
