@@ -11,8 +11,14 @@ const getVideos = asyncHandler(async(req, res) => {
     throw new Error('Please add the uuid')
   }
   const data = await Video.findOne({uuid})
-  res.status(200)
-  res.json({data})
+  if (data) {
+    res.status(200)
+    res.json(data.videos)
+  } else {
+    res.status(400)
+    throw new Error(`Invalid data`)
+  }
+  
 })
 
 
