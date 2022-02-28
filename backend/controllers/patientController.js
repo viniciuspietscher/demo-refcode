@@ -13,7 +13,7 @@ const getVideos = asyncHandler(async(req, res) => {
   const data = await Video.findOne({uuid})
   if (data) {
     res.status(200)
-    res.json(data.videos)
+    res.json({videos: data.videos, lang: data.language})
   } else {
     res.status(400)
     throw new Error(`Invalid data`)
