@@ -80,8 +80,8 @@ status(201) Created
 }
 ```
 
-#### GET: localhost:5000/api/patient/
-* requires an uuid
+#### GET: localhost:5000/api/patient/:id
+* requires a valid as params
 
 Gets an array of videos and language.
 
