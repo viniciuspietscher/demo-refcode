@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
+const validator = require('email-validator')
 const { v4: uuidv4 } = require('uuid')
 const Video = require('../models/videoModel')
 
@@ -16,6 +17,11 @@ const createUser = asyncHandler(async(req, res) => {
   if (!name || !email || !password) {
     res.status(400)
     throw new Error(`Please add all fields`)
+  }
+
+  if (!validator.validate(email)) {
+    res.status(400)
+    throw new Error('Please add an valid email')
   }
 
   const userExists = await User.findOne({ email })
