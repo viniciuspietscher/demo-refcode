@@ -45,6 +45,7 @@ const createUser = asyncHandler(async(req, res) => {
       name: user.name,
       email: user.email,
       password: user.password,
+      token: generateToken(user._id)
     })
   } else {
     res.status(400)
@@ -64,7 +65,7 @@ const loginUser = asyncHandler(async(req, res) => {
       _id: user.id,
       name: user.name,
       email: user.email,
-      token: await generateToken(user._id)
+      token: generateToken(user._id)
     })
   } else {
     res.status(400)
@@ -94,10 +95,10 @@ const submitData = asyncHandler(async(req, res) => {
     throw new Error('Please select the target language')
   }
   
-  const uuid = await generateUuid()
+  const uuid = generateUuid()
   const videos = req.body.videos.split(', ')
   const lang = req.body.lang
-  const videos_lang = await getTranslatedVideo(videos, lang)
+  const videos_lang = getTranslatedVideo(videos, lang)
 
   const addVideo = await Video.create({
     videos: videos_lang,
@@ -120,9 +121,6 @@ const submitData = asyncHandler(async(req, res) => {
   
 })
 
-
-
-
 // get video on target language
 const getTranslatedVideo = (arr, lang) => {
   let translatedVideos = []
@@ -136,9 +134,11 @@ const getTranslatedVideo = (arr, lang) => {
 const generateUuid = () => {
   return uuidv4()
 }
+
 // JWT
 const generateToken = (id) => {
-  return jwt.sign({id}, process.env.JWT_SECRET, {
+  return jwt.sign({id}, process.env.JWT_SECRET,
+  {
     expiresIn: "30d"
   })
 }
