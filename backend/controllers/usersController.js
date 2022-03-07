@@ -5,6 +5,7 @@ const User = require('../models/userModel')
 const validator = require('email-validator')
 const { v4: uuidv4 } = require('uuid')
 const Video = require('../models/videoModel')
+const { passwordStrength } = require('check-password-strength')
 
 
 
@@ -19,10 +20,17 @@ const createUser = asyncHandler(async(req, res) => {
     throw new Error(`Please add all fields`)
   }
 
+  if (passwordStrength(password).value === 'Too weak' || passwordStrength(password).value === 'Weak') {
+    res.status(400)
+    throw new Error(`Password must be at least 8 characters and contain uppercase, lowercase, number and a symbol`)
+  }
+
   if (!validator.validate(email)) {
     res.status(400)
     throw new Error('Please add an valid email')
   }
+
+
 
   const userExists = await User.findOne({ email })
   if (userExists) {
